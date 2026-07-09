@@ -424,30 +424,28 @@ if len(bucket) > _MAX_REQUESTS:       # 1 > 20 is False — all pass!
 
 ## Summary Table
 
-| # | File | Lines | Difficulty | Points |
-|---|------|-------|-----------|--------|
-| 1 | `app/auth.py` | 50 | Easy | 3 |
-| 2 | `app/auth.py` | 97 | Easy | 3 |
-| 3 | `app/timeutils.py` | 13 | Easy | 3 |
-| 4 | `app/routers/bookings.py` | 86 | Easy | 3 |
-| 5 | `app/routers/bookings.py` | 93 | Easy | 3 |
-| 6 | `app/routers/bookings.py` | 137 | Easy | 3 |
-| 7 | `app/routers/bookings.py` | 138 | Easy | 3 |
-| 8 | `app/routers/bookings.py` | 139 | Easy | 3 |
-| 9 | `app/routers/bookings.py` | 166 | Easy | 3 |
-| 10 | `app/routers/bookings.py` | 50 | Medium | 5 |
-| 11 | `app/routers/bookings.py` | 201 | Medium | 5 |
-| 12 | `app/routers/bookings.py` | 206 | Medium | 5 |
-| 13 | `app/routers/auth.py` | 37–43 | Medium | 5 |
-| 14 | `app/routers/auth.py` | 81–93 | Medium | 5 |
-| 15 | `app/services/refunds.py` | 15–17 | Medium | 5 |
-| 16 | `app/services/export.py` | 48–50 | Medium | 5 |
-| 17 | `app/cache.py` | 13, 26 | Medium | 5 |
-| 18 | `app/services/notifications.py` | 24–35 | Hard | 10 |
-| 19 | `app/services/reference.py` | 17–21 | Hard | 10 |
-| 20 | `app/routers/bookings.py` | 100–124 | Hard | 10 |
-| 21 | `app/routers/bookings.py` | 195–214 | Hard | 10 |
-| 22 | `app/services/stats.py` | 15–26 | Hard | 10 |
-| 23 | `app/services/ratelimit.py` | 18–26 | Hard | 10 |
-
-**Total: 9 × 3 + 7 × 5 + 6 × 10 = 27 + 35 + 60 = 122 points**
+| # | File | Lines | Difficulty |
+|---|------|-------|------------|
+| 1 | `app/auth.py` | 50 | Easy |
+| 2 | `app/auth.py` | 97 | Easy |
+| 3 | `app/timeutils.py` | 13 | Easy |
+| 4 | `app/routers/bookings.py` | 86 | Easy |
+| 5 | `app/routers/bookings.py` | 93 | Easy |
+| 6 | `app/routers/bookings.py` | 137 | Easy |
+| 7 | `app/routers/bookings.py` | 138 | Easy |
+| 8 | `app/routers/bookings.py` | 139 | Easy |
+| 9 | `app/routers/bookings.py` | 166 | Easy |
+| 10 | `app/routers/bookings.py` | 50 | Medium |
+| 11 | `app/routers/bookings.py` | 201 | Medium |
+| 12 | `app/routers/bookings.py` | 206 | Medium |
+| 13 | `app/routers/auth.py` | 37–43 | Medium |
+| 14 | `app/routers/auth.py` | 81–93 | Medium |
+| 15 | `app/services/refunds.py` | 15–17 | Medium |
+| 16 | `app/services/export.py` | 48–50 | Medium |
+| 17 | `app/cache.py` | 13, 26 | Medium |
+| 18 | `app/services/notifications.py` | 24–35 | Hard |
+| 19 | `app/services/reference.py` | 17–21 | Hard |
+| 20 | `app/routers/bookings.py` | 100–124 | Hard |
+| 21 | `app/routers/bookings.py` | 195–214 | Hard |
+| 22 | `app/services/stats.py` | 15–26 | Hard |
+| 23 | `app/services/ratelimit.py` | 18–26 | Hard |
