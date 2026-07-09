@@ -19,16 +19,6 @@ EXPORT_HEADER = [
 ]
 
 
-def fetch_bookings_raw(db: Session, room_id: int) -> list[Booking]:
-    """Load every booking for a single room, ordered by id."""
-    return (
-        db.query(Booking)
-        .filter(Booking.room_id == room_id)
-        .order_by(Booking.id.asc())
-        .all()
-    )
-
-
 def _fetch_scoped(db: Session, org_id: int, user_id: int | None, room_id: int | None) -> list[Booking]:
     query = db.query(Booking).join(Room).filter(Room.org_id == org_id)
     if user_id is not None:
@@ -45,11 +35,18 @@ def generate_export(
     room_id: int | None,
     include_all: bool,
 ) -> str:
+    # BUG FIX [Medium]: Original code called fetch_bookings_raw(db, room_id) when
+    # include_all=True AND room_id was provided. fetch_bookings_raw queries by
+    # room_id ONLY — no org_id filter. An admin could request:
+    #   GET /admin/export?include_all=true&room_id=<room_from_another_org>
+    # and receive bookings belonging to a different organisation, violating the
+    # multi-tenancy rule (Rule 9: "may only ever read … data belonging to their
+    # own organization … Cross-org resource IDs behave as non-existent → 404").
+    #
+    # Fix: remove fetch_bookings_raw entirely. All paths go through _fetch_scoped
+    # which always filters by org_id, enforcing tenant isolation.
     if include_all:
-        if room_id is not None:
-            rows = fetch_bookings_raw(db, room_id)
-        else:
-            rows = _fetch_scoped(db, org_id, None, None)
+        rows = _fetch_scoped(db, org_id, None, room_id)
     else:
         rows = _fetch_scoped(db, org_id, user_id, room_id)
 
