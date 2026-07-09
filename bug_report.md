@@ -6,7 +6,7 @@ exact fix applied.
 
 ---
 
-## Easy Bugs — 3 points each
+## Easy Bugs
 
 ### Bug 1 · `app/auth.py` line 50 — Access token expiry 60× too long
 
@@ -169,7 +169,7 @@ response["start_time"] = iso_utc(booking.created_at)
 
 ---
 
-## Medium Bugs — 5 points each
+## Medium Bugs
 
 ### Bug 10 · `app/routers/bookings.py` line 50 — back-to-back bookings rejected
 
@@ -321,7 +321,7 @@ needs changing.
 
 ---
 
-## Hard Bugs — 10 points each
+## Hard Bugs
 
 ### Bug 18 · `app/services/notifications.py` lines 24–35 — AB/BA deadlock
 
@@ -449,3 +449,14 @@ if len(bucket) > _MAX_REQUESTS:       # 1 > 20 is False — all pass!
 | 21 | `app/routers/bookings.py` | 195–214 | Hard |
 | 22 | `app/services/stats.py` | 15–26 | Hard |
 | 23 | `app/services/ratelimit.py` | 18–26 | Hard |
+
+---
+
+## Bug Count by Difficulty
+
+| Difficulty | Count |
+|------------|-------|
+| Easy | 9 |
+| Medium | 8 |
+| Hard | 6 |
+| **Total** | **23** |
