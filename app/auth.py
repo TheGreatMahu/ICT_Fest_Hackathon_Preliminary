@@ -47,7 +47,11 @@ def _now_ts() -> int:
 
 def create_access_token(user: User) -> str:
     iat = _now_ts()
-    lifetime = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    # BUG FIX [Easy]: Original code was timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES * 60).
+    # ACCESS_TOKEN_EXPIRE_MINUTES = 15, so 15 * 60 = 900 minutes = 54,000 seconds.
+    # Spec requires exactly 900 seconds (15 minutes). The extra * 60 multiplied
+    # minutes into minutes again, making tokens valid for 15 hours instead of 15 minutes.
+    lifetime = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user.id),
         "org": user.org_id,
@@ -94,7 +98,11 @@ def get_token_payload(request: Request) -> dict:
     payload = decode_token(token)
     if payload.get("type") != "access":
         raise AppError(401, "UNAUTHORIZED", "Wrong token type")
-    if payload.get("sub") in _revoked_tokens:
+    # BUG FIX [Easy]: Original code checked payload.get("sub") against _revoked_tokens.
+    # However, revoke_access_token() adds payload["jti"] (the unique token ID) to the
+    # set — not "sub" (which is the user ID). Since "sub" was never in the set, a
+    # logged-out token remained valid forever. Fix: check "jti" instead of "sub".
+    if payload.get("jti") in _revoked_tokens:
         raise AppError(401, "UNAUTHORIZED", "Token has been revoked")
     return payload
 
