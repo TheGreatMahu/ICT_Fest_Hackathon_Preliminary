@@ -10,7 +10,13 @@ def parse_input_datetime(value: str) -> datetime:
     """
     dt = datetime.fromisoformat(value)
     if dt.tzinfo is not None:
-        dt = dt.replace(tzinfo=None)
+        # BUG FIX [Easy]: The original code used dt.replace(tzinfo=None) which
+        # strips the timezone info WITHOUT converting the time value to UTC.
+        # For example, "14:00+05:30" would be stored as 14:00 UTC instead of
+        # the correct 08:30 UTC — a 5.5-hour error.
+        # Fix: call .astimezone(timezone.utc) first to shift the clock to UTC,
+        # THEN strip tzinfo so the stored datetime is naive UTC.
+        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt
 
 
