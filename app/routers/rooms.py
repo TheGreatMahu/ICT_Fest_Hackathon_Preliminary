@@ -10,7 +10,6 @@ from ..database import get_db
 from ..errors import AppError
 from ..models import Booking, Room, User
 from ..schemas import RoomCreateRequest
-from ..services import stats
 from ..timeutils import iso_utc
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
@@ -107,9 +106,19 @@ def room_stats(
     user: User = Depends(get_current_user),
 ):
     room = _get_org_room(db, room_id, user.org_id)
-    current = stats.get(room.id)
+    # BUG FIX [Hard]: The original code read from an in-memory counter (_stats dict)
+    # that is updated incrementally. This counter resets to zero on every server
+    # restart and drifts under concurrent activity due to the race condition in
+    # services/stats.py. Rule 14 requires stats to be "always consistent with the
+    # bookings themselves." Querying the database directly guarantees consistency
+    # regardless of concurrent activity or restarts.
+    confirmed = (
+        db.query(Booking)
+        .filter(Booking.room_id == room.id, Booking.status == "confirmed")
+        .all()
+    )
     return {
         "room_id": room.id,
-        "total_confirmed_bookings": current["count"],
-        "total_revenue_cents": current["revenue"],
+        "total_confirmed_bookings": len(confirmed),
+        "total_revenue_cents": sum(b.price_cents for b in confirmed),
     }
