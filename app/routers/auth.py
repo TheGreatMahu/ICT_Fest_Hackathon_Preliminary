@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..auth import (
+    _revoked_tokens,
     create_access_token,
     create_refresh_token,
     decode_token,
@@ -34,13 +35,12 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         .filter(User.org_id == org.id, User.username == payload.username)
         .first()
     )
+    # BUG FIX [Medium]: Original code returned HTTP 201 with the existing user's
+    # data when a duplicate username was registered in the same org. The spec
+    # (Rule 15) requires a 409 USERNAME_TAKEN error. Returning success silently
+    # allowed anyone to enumerate existing usernames and broke the uniqueness contract.
     if existing is not None:
-        return {
-            "user_id": existing.id,
-            "org_id": org.id,
-            "username": existing.username,
-            "role": existing.role,
-        }
+        raise AppError(409, "USERNAME_TAKEN", "Username already taken")
 
     user = User(
         org_id=org.id,
@@ -83,6 +83,13 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
     data = decode_token(payload.refresh_token)
     if data.get("type") != "refresh":
         raise AppError(401, "UNAUTHORIZED", "Wrong token type")
+    # BUG FIX [Medium]: Original code never invalidated the presented refresh token,
+    # violating Rule 8 ("single-use: reuse → 401"). A stolen refresh token could be
+    # used indefinitely to generate new access tokens. Fix: check the token's jti
+    # against the revoked set first, then add it so any future reuse returns 401.
+    if data.get("jti") in _revoked_tokens:
+        raise AppError(401, "UNAUTHORIZED", "Refresh token already used")
+    _revoked_tokens.add(data["jti"])
     user = db.query(User).filter(User.id == int(data["sub"])).first()
     if user is None:
         raise AppError(401, "UNAUTHORIZED", "Unknown user")
