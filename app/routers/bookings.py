@@ -255,9 +255,14 @@ def cancel_booking(
             # BUG FIX [Medium]: Was 50 — must be 0 for notice < 24 hours (Rule 6).
             refund_percent = 0
 
-        refund_amount_cents = round(booking.price_cents * (refund_percent / 100.0))
-
-        log_refund(db, booking, refund_percent)
+        # BUG FIX [Medium]: The cancel response must return the SAME amount as what
+        # is stored in the RefundLog (Rule 6). The original code computed
+        # refund_amount_cents with round() (Python banker's rounding) but log_refund()
+        # uses math.floor(x+0.5) (round-half-up). For x.5 values these differ:
+        #   e.g. 101 cents @ 50% = 50.5 → round()=50, floor(50.5+0.5)=51 → mismatch.
+        # Fix: use the amount_cents from the RefundLog entry returned by log_refund().
+        refund_entry = log_refund(db, booking, refund_percent)
+        refund_amount_cents = refund_entry.amount_cents
 
         _settlement_pause()
         booking.status = "cancelled"
